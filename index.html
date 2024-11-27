@@ -15,14 +15,14 @@
     }
 
     .container {
-      max-width: 75%; /* Occupies 3/4 of the screen width */
+      max-width: 75%;
       margin: 0 auto;
     }
 
     .feed-container {
       overflow-y: auto;
       padding: 20px 0;
-      height: calc(100vh - 260px); /* Adjust height to leave space for the header and Create Post box */
+      height: calc(100vh - 260px);
     }
 
     .post-box, .create-post {
@@ -79,22 +79,19 @@
     .header {
       height: 80px;
       background: linear-gradient(to bottom, #003366, #00BFFF);
-
-      background-color: #0073b1;
       color: white;
       padding: 10px 15px;
       text-align: center;
       font-size: 1.5em;
-      font-family:'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif
-      
+      font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
     }
 
     .add-image {
+      margin-top: 10px;
+      cursor: pointer;
       display: flex;
       align-items: center;
-      margin-bottom: 10px;
       color: gray;
-      cursor: pointer;
     }
 
     .add-image:hover {
@@ -128,9 +125,10 @@
     <div class="create-post">
       <h5>Create a Post</h5>
       <textarea id="newPostText" class="form-control mb-2" rows="2" placeholder="What's on your mind?"></textarea>
-      <div class="add-image" id="addImage">
+      <div id="triggerImageInput" class="add-image">
         <i class="far fa-images"></i> Add Image
       </div>
+      <input type="file" id="imageInput" class="form-control d-none" accept="image/*">
       <button class="btn btn-primary w-100" id="postButton">Post</button>
     </div>
 
@@ -146,17 +144,13 @@
       const postFeed = document.getElementById("postFeed");
       const postButton = document.getElementById("postButton");
       const newPostText = document.getElementById("newPostText");
-      const addImageButton = document.getElementById("addImage");
+      const imageInput = document.getElementById("imageInput");
+      const triggerImageInput = document.getElementById("triggerImageInput");
 
-      // Default user names
-      const usernames = ["Alice", "Bob", "Charlie", "David", "Emily"];
-      let tempImage = null; // Temporary storage for the selected image
-
-      // Sample Dummy Posts
       let posts = [
         {
           username: "Alice",
-          text: "Building Integrated Photovoltaic (BIPV) technology is revolutionizing the energy landscape by seamlessly integrating solar panels into building designs. It transforms roofs, facades, and windows into energy-generating surfaces, offering a sustainable solution for urban energy demands. BIPV enhances aesthetics, reduces energy costs, and supports green building initiatives.",
+          text: "Building Integrated Photovoltaic (BIPV) technology is revolutionizing the energy landscape by seamlessly integrating solar panels into building designs.",
           image: "https://getpuresolar.com/wp-content/uploads/2024/03/bipv-wall.jpg",
           likes: 5,
           comments: [],
@@ -164,7 +158,7 @@
         },
         {
           username: "Bob",
-          text: "Building Integrated Photovoltaic (BIPV) technology is an innovative solution that blends solar energy systems with architectural elements, making buildings self-sufficient in energy. By replacing conventional materials like glass or roofing with solar panels, BIPV reduces carbon footprints while enhancing aesthetics and functionality. It's a step toward smarter, greener cities.",
+          text: "Building Integrated Photovoltaic (BIPV) technology is an innovative solution that blends solar energy systems with architectural elements.",
           image: "https://www.solarpowerworldonline.com/wp-content/uploads/2014/12/140708_Imec_Gebouw_V001.jpg",
           likes: 10,
           comments: ["Beautiful!", "Amazing streets!"],
@@ -209,32 +203,46 @@
       // Handle New Post
       postButton.addEventListener("click", () => {
         const text = newPostText.value.trim();
+        const imageFile = imageInput.files[0];
 
-        if (!text && !tempImage) {
+        if (!text && !imageFile) {
           alert("Please add text or an image to create a post.");
           return;
         }
 
+        let imageUrl = "";
+        if (imageFile) {
+          const reader = new FileReader();
+          reader.onload = (e) => {
+            imageUrl = e.target.result;
+            addPost(text, imageUrl);
+          };
+          reader.readAsDataURL(imageFile);
+        } else {
+          addPost(text, "");
+        }
+      });
+
+      const addPost = (text, imageUrl) => {
         const newPost = {
-          username: "Poovannan", // Set username for your posts
+          username: "Poovannan",
           text: text,
-          image: tempImage,
+          image: imageUrl,
           likes: 0,
           comments: [],
           timestamp: "Just now",
         };
 
         posts.unshift(newPost);
-        tempImage = null; // Reset tempImage after posting
         renderPosts();
         newPostText.value = "";
+        imageInput.value = "";
         alert("Post added successfully!");
-      });
+      };
 
-      // Simulate Adding an Image
-      addImageButton.addEventListener("click", () => {
-        tempImage = "https://via.placeholder.com/400"; // Add a placeholder image
-        alert("Image added to your post!");
+      // Trigger file input on click of image icon
+      triggerImageInput.addEventListener("click", () => {
+        imageInput.click();
       });
 
       // Handle Like and Comment Actions
